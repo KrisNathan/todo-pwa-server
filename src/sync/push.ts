@@ -1,15 +1,11 @@
 import { OpenAPIHono, z, createRoute } from "@hono/zod-openapi";
+import { verify } from "crypto";
+import { verifyEncryptedData } from "../crypto.js";
 
 const syncPushRoute = new OpenAPIHono();
 
 const syncPostSchema = z.object({
-  id: z.uuidv4().openapi({
-    param: {
-      in: "path",
-      name: "id",
-    },
-    example: "3c490739-41d2-4a21-9f73-12e7459b819e",
-  }),
+  pubKey: z.string(),
   data: z.string().openapi({
     example: "Sample data for sync post",
   }),
@@ -21,13 +17,12 @@ const syncPostSchema = z.object({
 syncPushRoute.openapi(
   createRoute({
     method: "post",
-    path: "/sync/{id}",
+    path: "/sync/push",
     request: {
-      params: syncPostSchema.pick({ id: true }),
       body: {
         content: {
           "application/json": {
-            schema: syncPostSchema.omit({ id: true }),
+            schema: syncPostSchema,
           },
         },
       },
@@ -49,12 +44,28 @@ syncPushRoute.openapi(
     },
   }),
   (c) => {
-    const { id } = c.req.valid("param");
-    return c.json({
-      message: `Sync post successful for ID: ${id}`,
-    });
-  }
-);
+    const { pubKey, data, createdAt } = c.req.valid("json");
 
+    // TODO: verify data (encrypted) with the pubKey
+
+    const isEncryptionValid = verifyEncryptedData(data, pubKey);
+    if (!isEncryptionValid) {
+      return c.json(
+        { error: "Invalid encrypted data format or verification failed." },
+        400,
+      );
+    }
+
+    // Check if existing data with same pubKey exists
+    // If it does exist, check if the stored data has newer createdAt
+    // If the new createdAt is newer, continue:
+    // Next save to redis: pubKey as key, data and createdAt as fields
+    //
+
+    return c.json({
+      message: `Sync post successful.`,
+    });
+  },
+);
 
 export default syncPushRoute;
