@@ -1,0 +1,28 @@
+name: todo-pwa-server
+
+networks:
+  todo_network:
+    driver: bridge
+
+services:
+  todo-pwa-server:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - todo_network
+    command: npm start
+    depends_on:
+      - redis
+  redis:
+    networks:
+      - todo_network
+    restart: unless-stopped
+    image: redis:latest
+    ports:
+      - "6379:6379"
