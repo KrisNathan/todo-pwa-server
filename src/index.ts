@@ -1,24 +1,15 @@
 import { serve } from "@hono/node-server";
-import { swaggerUI } from "@hono/swagger-ui";
-import { OpenAPIHono } from "@hono/zod-openapi";
-import syncPushRoute from "./sync/push.js";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import syncRoute from "./infrastructure/routes/sync";
 
-const app = new OpenAPIHono();
+const app = new Hono();
 
-app.route("/", syncPushRoute);
-
-app.doc("/openapi.json", {
-  openapi: "3.0.0",
-  info: {
-    title: "Todo PWA Sync Server API",
-    version: "1.0.0",
-  },
-});
-
-app.get(
-  "/doc",
-  swaggerUI({ url: "/openapi.json" })
-);
+app.use("*", cors({
+  origin: ["http://localhost:5173", "https://todo-pwa.pages.dev"],
+  credentials: true,
+}));
+app.route("/api/sync", syncRoute);
 
 serve(
   {
@@ -27,5 +18,5 @@ serve(
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);
-  }
+  },
 );
