@@ -16,14 +16,14 @@ export default class SyncDataService {
       throw new InvalidDataError("Invalid data");
     }
 
-    const oldData = await this.syncDataRepository.getSyncData(
-      syncData.publicKey,
-    );
-    if (oldData) {
-      if (oldData.createdAt < syncData.createdAt) {
-        throw new OutOfDateDataError("Data is not the latest");
-      }
-    }
+    // const oldData = await this.syncDataRepository.getSyncData(
+    //   syncData.publicKey,
+    // );
+    // if (oldData) {
+    //   if (oldData.createdAt < syncData.createdAt) {
+    //     throw new OutOfDateDataError("Data is not the latest");
+    //   }
+    // }
 
     await this.syncDataRepository.saveSyncData(syncData, 60 * 60);
   }
