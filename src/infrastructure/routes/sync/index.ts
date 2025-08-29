@@ -22,7 +22,6 @@ syncRoute.post("/", async (c) => {
   }
 
   const body = await c.req.json();
-  console.log(body);
   const parseResult = SyncPushSchema.safeParse(body);
   if (parseResult.error) {
     return c.json({ error: parseResult.error.message }, 400);
@@ -54,7 +53,6 @@ syncRoute.get("/", async (c) => {
   const pullSyncDataUseCase = new PullSyncDataUseCase(compositionRoot.syncDataService);
 
   const syncData = await pullSyncDataUseCase.execute(new PublicKey(publicKey));
-  console.log(syncData);
 
   if (!syncData) {
     return c.json({ message: "No data found" }, 404);
