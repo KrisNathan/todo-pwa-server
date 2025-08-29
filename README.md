@@ -2,7 +2,7 @@
 
 ## Frontend & Home
 
-https://github.com/KrisNathan/todo-pwa-server
+https://github.com/KrisNathan/todo-pwa
 
 
 ## Development
